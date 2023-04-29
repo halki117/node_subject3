@@ -4,7 +4,29 @@
     <title>App</title>
   </head>
   <body>
-    <h1>Welcome to World</h1>
-    {{message}}
+    <h1>ようこそ</h1>
+    <hr>
+    <p>以下のボタンをクリック</p>
+    <hr>
+    <button id="execute-btn">開始</button>
+    {{!-- {{message}} --}}
   </body>
 </html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(() => {
+    $('#execute-btn').click(() => {
+      $.ajax({
+        url: '/execute',
+        type: 'POST',
+        success: (response) => {
+          console.log(response.message);
+        },
+        error: (xhr, status, error) => {
+          console.error(error);
+        }
+      });
+    });
+  });
+</script>

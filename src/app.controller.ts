@@ -1,4 +1,4 @@
-import { Get, Controller, Render, Res } from '@nestjs/common';
+import { Get, Controller, Render, Res, Post } from '@nestjs/common';
 import { Response } from 'express';
 import { AppService } from './app.service';
 
@@ -16,6 +16,14 @@ export class AppController {
     return res.render(this.appService.getIndexName(), {
       message: this.appService.getMessage(),
     });
+  }
+
+  @Post('/execute')
+  async execute(): Promise<any> {
+    // 非同期処理のコードをここに書く
+    return { 
+      message: '非同期処理が完了しました。',
+    };
   }
 
 }
