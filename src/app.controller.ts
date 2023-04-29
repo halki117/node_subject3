@@ -18,12 +18,17 @@ export class AppController {
     });
   }
 
-  @Post('/execute')
-  async execute(): Promise<any> {
-    // 非同期処理のコードをここに書く
-    return { 
-      message: '非同期処理が完了しました。',
-    };
+  // @Post('/execute')
+  // async execute(): Promise<any> {
+  //   // 非同期処理のコードをここに書く
+  //   return { 
+  //     message: '非同期処理が完了しました。',
+  //   };
+  // }
+
+  @Get('trivia')
+  async getTriviaData() {
+    return this.appService.getTriviaData();
   }
 
 }
