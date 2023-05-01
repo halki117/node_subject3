@@ -4,33 +4,112 @@
     <title>App</title>
   </head>
   <body>
-    <h1>ようこそ</h1>
-    <hr>
-    <p>以下のボタンをクリック</p>
-    <p class="question"></p>
-    <hr>
-    <button id="execute-btn">開始</button>
-    {{!-- {{message}} --}}
+    <div class="start">
+      <h1>ようこそ</h1>
+      <hr>
+      <p>以下のボタンをクリック</p>
+      <hr>
+      <button id="execute-btn">開始</button>
+    </div>
+
+    <div class="loading-now">
+      <h1>取得中</h1>
+      <hr>
+      <p>少々お待ちください</p>
+      <hr>
+    </div>
+      
+    <div class="questions">
+      <h1>問題<span id="question-number"></span></h1>
+      <h2>[ジャンル]<span id="genre"></span></h2>
+      <h2>[難易度]<span id="level"></span></h2>
+      <hr>
+      <div id="question"></div>
+      <hr>
+      <div id="selections">
+      </div>
+    </div>
+
+    <div class="result">
+      <h1>あなたの正解数は<span id="count-correct-answers"></span>です！</h1>
+      <hr>
+      <p>再度チャレンジしたい場合は以下をクリック！！</p>
+      <hr>
+      <a href="/"><button>ホームに戻る</button></a>
+    </div>
   </body>
 </html>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $(document).ready(() => {
+    let questionIndex = 0;
+    let totalCorrections = 0;
+    let genre = '';
+    let level = '';
+    let question = '';
+    let selectionButtons = '';
+
     $('#execute-btn').click(() => {
-      $.ajax({
-        url: '/trivia',
-        type: 'GET',
-        success: (response) => {
-          response.forEach((value,index,array) => {
-            console.log(value.question);
-            $('.question').text(value.question)
+            
+      $('.start').toggle();
+      $('.loading-now').toggle();
+      
+      fetch("/quiz").then((res) => {
+        
+        $('.loading-now').toggle();
+        $('.questions').toggle();
+
+        res.json().then(quize => {
+          doQuiz(quize);
+        });
+
+        function doQuiz(quize) {
+          const numberOfQuestions = quize.length;
+
+          $('#question-number').text(questionIndex + 1);
+          $('#genre').text(quize[questionIndex].category);
+          $('#level').text(quize[questionIndex].difficulty);
+          $('#question').text(quize[questionIndex].question);
+
+          const allAnswers = [quize[questionIndex].correctAnswer, ...quize[questionIndex].incorrectAnswers];
+          const shuffledAnswers = allAnswers.sort(() => Math.random() - 0.5);
+
+          shuffledAnswers.forEach((value,index) => {
+            selectionButtons += `<div><button class="answer-btn" id="${index}">${value}</button><div><br>`;
           });
-        },
-        error: (xhr, status, error) => {
-          console.error(error);
+
+          $('#selections').html(selectionButtons);
+
+          console.log(quize[questionIndex].correctAnswer);
+          $('.answer-btn').click(function(){
+            if($(this).text() === quize[questionIndex].correctAnswer) {
+              totalCorrections++;
+            }
+
+            questionIndex++;
+            selectionButtons = '';     
+
+            if (questionIndex < numberOfQuestions) {
+              doQuiz(quize);
+            } else {
+              $('.questions').toggle();
+              $('.result').toggle();
+              $('#count-correct-answers').text(totalCorrections);
+            }
+          });
         }
-      });
+
+      }).catch(error => {
+        console.error('通信に失敗しました', error);
+      });;
+
     });
   });
 </script>
+
+<style>
+  .loading-now,.questions,.result{
+    display: none;
+  }
+</style>
