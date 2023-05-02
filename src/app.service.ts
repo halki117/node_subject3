@@ -13,14 +13,4 @@ export class AppService {
     return message;
   }
 
-  async getTriviaData() {
-    const url = 'https://opentdb.com/api.php?amount=10';
-    try{
-      const res = await axios.get(url);
-      return res.data.results;
-    } catch(e) {
-      console.error(e);
-      return null;
-    }
-  }
 }

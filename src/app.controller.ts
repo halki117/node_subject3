@@ -17,7 +17,7 @@ export class AppController {
 
   @Get('quiz')
   async getQuizData(): Promise<string> {
-    // クイズデータを取得、でーたはjson形式で返す
+    // クイズデータを取得、データはjson形式で返す
     let quizData = await this.quizService.getQuizData();
     return JSON.stringify(quizData);
   }

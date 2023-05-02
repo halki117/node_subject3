@@ -3,6 +3,7 @@ import { Quiz } from '../quiz';
 import axios from 'axios';
 
 @Injectable()
+// クイズのデータを取得するサービス
 export class QuizService {
   private readonly URL = 'https://opentdb.com/api.php?amount=10';
 
