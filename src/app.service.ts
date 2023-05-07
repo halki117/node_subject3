@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import axios from 'axios';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getIndexName(): string {
+    const name: string = 'index';
+    return name;
   }
+
+  getMessage(): string {
+    const message: string = 'Hello World!';
+    return message;
+  }
+
 }

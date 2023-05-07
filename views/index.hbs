@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>App</title>
+  </head>
+  <body>
+    <div class="start">
+      <h1>ようこそ</h1>
+      <hr>
+      <p>以下のボタンをクリック</p>
+      <hr>
+      <button id="execute-btn">開始</button>
+    </div>
+
+    <div class="loading-now">
+      <h1>取得中</h1>
+      <hr>
+      <p>少々お待ちください</p>
+      <hr>
+    </div>
+      
+    <div class="questions">
+      <h1>問題<span id="question-number"></span></h1>
+      <h2>[ジャンル]<span id="genre"></span></h2>
+      <h2>[難易度]<span id="level"></span></h2>
+      <hr>
+      <div id="question"></div>
+      <hr>
+      <div id="selections">
+      </div>
+    </div>
+
+    <div class="result">
+      <h1>あなたの正解数は<span id="count-correct-answers"></span>です！</h1>
+      <hr>
+      <p>再度チャレンジしたい場合は以下をクリック！！</p>
+      <hr>
+      <a href="/"><button>ホームに戻る</button></a>
+    </div>
+  </body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(() => {
+    /* 【必要な変数の初期化】 */
+    /* 何個目のクイズ */
+    let questionIndex = 0;
+    /* 正解数の合計 */
+    let totalCorrections = 0;
+    /* クイズのジャンル */
+    let genre = '';
+    /* クイズの難易度 */
+    let level = '';
+    /* クイズの内容 */
+    let question = '';
+    /* 回答用ボタン */
+    let selectionButtons = '';
+
+    $('#execute-btn').click(() => {
+      
+      /* スタート画面から取得中画面への表示切り替え */
+      $('.start').toggle();
+      $('.loading-now').toggle();
+      
+      /* 非同期処理を完了した際の処理 */
+      fetch("/quiz").then((res) => {
+        
+        /* 取得中画面からクイズ画面への表示切り替え */
+        $('.loading-now').toggle();
+        $('.questions').toggle();
+
+        res.json().then(quize => {
+          /* クイズ出題の処理を実行 */
+          doQuiz(quize);
+        });
+
+        function doQuiz(quize) {
+          /* 出題する問題数の算出（想定では10問） */
+          const numberOfQuestions = quize.length;
+
+          /* 各クイズ画面へ情報を表示 */
+          $('#question-number').text(questionIndex + 1);
+          $('#genre').text(quize[questionIndex].category);
+          $('#level').text(quize[questionIndex].difficulty);
+          $('#question').text(quize[questionIndex].question);
+
+          /* 正解、不正解の情報を一つの配列にまとめる */
+          const allAnswers = [quize[questionIndex].correctAnswer, ...quize[questionIndex].incorrectAnswers];
+          /* 配列内の要素をシャッフルして、不規則な並びにする */
+          const shuffledAnswers = allAnswers.sort(() => Math.random() - 0.5);
+
+          /* 回答ボタンのhtmlを追加 */
+          shuffledAnswers.forEach((value,index) => {
+            selectionButtons += `<div><button class="answer-btn" id="${index}">${value}</button><div><br>`;
+          });
+          $('#selections').html(selectionButtons);
+  
+          $('.answer-btn').click(function(){
+
+            /* 正解した際に正解数をカウントアップ */
+            if($(this).text() === quize[questionIndex].correctAnswer) {
+              totalCorrections++;
+            }
+            
+            /* 問題数目のカウントアップ、及び回答用ボタンの初期化 */
+            questionIndex++;
+            selectionButtons = '';     
+
+            /* クイズが全て解き終わってなければ次の問題へ、時終われば結果発表画面を表示 */
+            if (questionIndex < numberOfQuestions) {
+              doQuiz(quize);
+            } else {
+              $('.questions').toggle();
+              $('.result').toggle();
+              $('#count-correct-answers').text(totalCorrections);
+            }
+            
+          });
+        }
+      }).catch(error => {
+        console.error('通信に失敗しました', error);
+      });;
+
+    });
+  });
+</script>
+
+<style>
+  .loading-now,.questions,.result{
+    display: none;
+  }
+</style>
